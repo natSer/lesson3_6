@@ -8,21 +8,21 @@ def pytest_addoption(parser):
     parser.addoption('--language', action='store', 
                  help="Choose language: fr, es, etc.")
 
-@pytest.fixture(scope="function")
-def language(request):
-    language=str(request.config.getoption("language")  )
-    return language
-
 
 @pytest.fixture(scope="function")
 def browser(request):   
+    language=str(request.config.getoption("language")  )
     browser_name = request.config.getoption("browser_name")
     if browser_name == "chrome":                      
         print("\nstart chrome browser with for test..")
-        browser = webdriver.Chrome()
+        options = Options()
+        options.add_experimental_option('prefs', {'intl.accept_languages': language})
+        browser = webdriver.Chrome(options=options)
     elif browser_name == "firefox":
-        print("\nstart firefox browser for test..")
-        browser = webdriver.Firefox()
+        fp = webdriver.FirefoxProfile()
+        fp.set_preference("intl.accept_languages", language)
+        browser = webdriver.Firefox(firefox_profile=fp)
+        print("\nstart firefox browser for test..")       
     else:
         print("Browser {} still is not implemented".format(browser_name))
     yield browser
